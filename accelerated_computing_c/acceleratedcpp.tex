@@ -1,0 +1,145 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{verbatim}
+
+\title{Fundamentals of Accelerated Computing C/C++}
+\author{Notes inspired by NVIDIA DLI}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{Accelerating Applications with CUDA C/C++}
+\subsection{GPU Accelerated Applications}
+In accelerated Applications, data is allocated with 
+\begin{verbatim}
+cudaMallocManaged()
+\end{verbatim}
+automatically migrating the data to perform parallel work.
+
+To sync asychronous GPU work with CPU code use
+\begin{verbatim}
+cudaDeviceSynchronize()
+\end{verbatim}
+
+\subsection{Writing Application Code for the GPU}
+
+.cu is a file extension is the file extension for CUDA-accelerated programs.
+Below is an example file:
+\begin{verbatim}
+void CPUFunction()
+{
+  printf("This function is defined to run on the CPU.\n");
+}
+
+__global__ void GPUFunction() 
+{
+  printf("This function is defined to run on the GPU.\n");
+}
+
+int main()
+{
+  CPUFunction();
+
+  GPUFunction<<<1, 1>>>();
+  cudaDeviceSynchronize();
+}
+\end{verbatim}
+
+\newpage
+
+Some important lines to describe:
+
+
+\begin{verbatim}
+    __global__ void GPUFunction()
+\end{verbatim}
+
+\noindent \textbf{\_\_global\_\_} indicates that that this function will run on the GPU and can be invoked globally, either by the CPU or GPU.\\
+
+\noindent \textbf{void()} functions defined with \_\_global\_\_ must return with type void.
+
+\begin{verbatim}
+    GPUFunction<<<1, 1>>>();
+    GPUFunction<<<#ofBlocks,#ofThreads>>>();
+\end{verbatim}
+This function is a kernel, using the \verb_<<<...>>>_ syntax allows us to specify the thread hierarchy and the number of thread groupings (called blocks). In this kernel, it is being lanched with 1 block that contains 1 thread.
+
+\begin{verbatim}
+cudaDeviceSynchronize();
+\end{verbatim}
+\noindent Launching kernals is \textbf{asynchronous}. In other words, the CPU code will continue to execute without waiting for the kernal launch to complete. The snippet above will cause the \textbf{host(CPU)} code to wait until the device \textbf{device(GPU)} code completes, and only then resume execution on the CPU.
+
+\subsection{CUDA Thread Hierarchy} 
+
+GPU \rightarrow Grid \rightarrow Block \rightarrow Thread
+
+Kernels are launched with execution configuration, \verb_GPUFunction<<<...>>>_. Every block in the grid contain the same number of threads where the work is done in parallel on the GPU threads. 
+
+
+\subsection{Launching Parallel Kernels}
+
+The execution configuration allows programmers to specify details about launching the kernel to run in parallel on multiple GPU threads. More precisely, the execution configuration allows programmers to specifiy how many groups of threads - called \textbf{thread blocks}, or just blocks - and how many threads they would like each thread block to contain. The syntax for this is:
+
+\begin{verbatim}
+    <<< NUMBER_OF_BLOCKS, NUMBER_OF_THREADS_PER_BLOCK>>>
+\end{verbatim}
+
+The following cases for some assumed kernel:
+
+\begin{itemize}
+	\item \verb_someKernel<<<1, 1>>()_ is configured to run in a single thread block which has a single thread and will therefore run only once. 
+	\item \verb_someKernel<<<1, 10>>()_ is configured to run in a single thread block which has 10 threads and will therefore run 10 times.
+	\item \verb_someKernel<<<10, 1>>()_ is configured to run in 10 thread blocks which each have a single thread and will therefore run 10 times. 
+	\item \verb_someKernel<<<10, 10>>()_ is configured to run in 10 thread blocks which each have 10 threads and will therefore run 100 times.
+
+\end{itemize}
+\subsection{CUDA-Provided Thread Hierarchy Variables}
+CUDA-provided variables describe its executing thread, block, and grid
+
+\begin{itemize}
+\item \verb_gridDim.x_ defines the number of block in the grid
+\item \verb_blockIdx.x_ defines the index of the block within the grid. Indexed at 0.
+\item \verb_blockDim.x_ defines the number of threads in a block. Recall all blocks contain the same number of threads.
+
+\item \verb_threadIdx.x_ defines the index of the thread within a block. Indexed at 0.
+\end{itemize}
+
+\subsection{Thread and Block Indices}
+CUDA kernels have access to special variables identifying both the index of the thread, \verb_threadIdx.x_, and the index of the block that the thread is in, \verb_blockIdx.x_.
+
+\subsection{Accelerating For Loops}
+For loops are ripe for accelerations. Two steps must be taken:
+\begin{itemize}
+	\item A kernel must be written to do a single iteration of the loop
+	\item The execution configurations must execute the correct number of times, 		   for example, the number of times the loop would of been iterated.
+\end{itemize}
+
+\subsection{Coordinating Parallel Threads}
+
+The formula:
+
+\begin{verbatim}
+    threadIdx.x + blockIdx.x * blockDim.x
+\end{verbatim}
+
+maps each thread to one element in the vector
+
+
+
+
+
+
+
+\section{Unified Memory}
+\subsection{Iterative Optimizations with the NVIDIA Command Line Profiler}
+
+\textbf{Profile an Application with nsys}
+
+\textbf{Optimize and Profile}
+
+\textbf{Optimize Iterative}
+
+\end{document}
+

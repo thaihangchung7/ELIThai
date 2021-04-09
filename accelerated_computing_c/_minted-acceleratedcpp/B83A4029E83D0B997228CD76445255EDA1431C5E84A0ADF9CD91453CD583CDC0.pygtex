@@ -1,0 +1,31 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{c+cp}{\PYGZsh{}include} \PYG{c+cpf}{\PYGZlt{}stdio.h\PYGZgt{}}
+
+
+\PYG{c+cm}{/*}
+\PYG{c+cm}{ * Notice the absence of the previously expected argument `N`.}
+\PYG{c+cm}{ */}
+
+\PYG{k+kr}{\PYGZus{}\PYGZus{}global\PYGZus{}\PYGZus{}} \PYG{k+kt}{void} \PYG{n}{loop}\PYG{p}{()}
+\PYG{p}{\PYGZob{}}
+  \PYG{c+cm}{/*}
+\PYG{c+cm}{   * This kernel does the work of only 1 iteration}
+\PYG{c+cm}{   * of the original for loop. Indication of which}
+\PYG{c+cm}{   * \PYGZdq{}iteration\PYGZdq{} is being executed by this kernel is}
+\PYG{c+cm}{   * still available via `threadIdx.x`.}
+\PYG{c+cm}{   */}
+
+  \PYG{n}{printf}\PYG{p}{(}\PYG{l+s}{\PYGZdq{}This is iteration number \PYGZpc{}d}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s}{\PYGZdq{}}\PYG{p}{,} \PYG{n+nb}{threadIdx}\PYG{p}{.}\PYG{n}{x}\PYG{p}{);}
+\PYG{p}{\PYGZcb{}}
+
+\PYG{k+kt}{int} \PYG{n}{main}\PYG{p}{()}
+\PYG{p}{\PYGZob{}}
+  \PYG{c+cm}{/*}
+\PYG{c+cm}{   * It is the execution context that sets how many \PYGZdq{}iterations\PYGZdq{}}
+\PYG{c+cm}{   * of the \PYGZdq{}loop\PYGZdq{} will be done.}
+\PYG{c+cm}{   */}
+
+  \PYG{n}{loop}\PYG{o}{\PYGZlt{}\PYGZlt{}\PYGZlt{}}\PYG{l+m+mi}{1}\PYG{p}{,} \PYG{l+m+mi}{10}\PYG{o}{\PYGZgt{}\PYGZgt{}\PYGZgt{}}\PYG{p}{();}
+  \PYG{n}{cudaDeviceSynchronize}\PYG{p}{();}
+\PYG{p}{\PYGZcb{}}
+\end{Verbatim}

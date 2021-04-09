@@ -1,0 +1,31 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{c+c1}{\PYGZsh{}include \PYGZlt{}stdio.h\PYGZgt{}}
+
+
+/*
+ * Notice the absence of the previously expected argument \PYG{l+s+sb}{`}N\PYG{l+s+sb}{`}.
+ */
+
+\PYGZus{}\PYGZus{}global\PYGZus{}\PYGZus{} void loop\PYG{o}{()}
+\PYG{o}{\PYGZob{}}
+  /*
+   * This kernel does the work of only \PYG{l+m}{1} iteration
+   * of the original \PYG{k}{for} loop. Indication of which
+   * \PYG{l+s+s2}{\PYGZdq{}iteration\PYGZdq{}} is being executed by this kernel is
+   * still available via \PYG{l+s+sb}{`}threadIdx.x\PYG{l+s+sb}{`}.
+   */
+
+  printf\PYG{o}{(}\PYG{l+s+s2}{\PYGZdq{}This is iteration number \PYGZpc{}d\PYGZbs{}n\PYGZdq{}}, threadIdx.x\PYG{o}{)}\PYG{p}{;}
+\PYG{o}{\PYGZcb{}}
+
+int main\PYG{o}{()}
+\PYG{o}{\PYGZob{}}
+  /*
+   * It is the execution context that sets how many \PYG{l+s+s2}{\PYGZdq{}iterations\PYGZdq{}}
+   * of the \PYG{l+s+s2}{\PYGZdq{}loop\PYGZdq{}} will be \PYG{k}{done}.
+   */
+
+  loop\PYG{o}{\PYGZlt{}\PYGZlt{}\PYGZlt{}}\PYG{l+m}{1}, \PYG{l+m}{10}\PYGZgt{}\PYGZgt{}\PYGZgt{}\PYG{o}{()}\PYG{p}{;}
+  cudaDeviceSynchronize\PYG{o}{()}\PYG{p}{;}
+\PYG{o}{\PYGZcb{}}
+\end{Verbatim}

@@ -1,0 +1,3 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+!nvcc \PYGZhy{}arch\PYG{o}{=}sm\PYGZus{}70 \PYGZhy{}o hello\PYGZhy{}gpu \PYG{l+m}{01}\PYGZhy{}hello/01\PYGZhy{}hello\PYGZhy{}gpu.cu \PYGZhy{}run
+\end{Verbatim}
