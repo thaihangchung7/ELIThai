@@ -1,0 +1,123 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{verbatim}
+
+\title{Fundamentals of Accelerated Computing with Python}
+\author{Notes inspired by NVIDIA DLI}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction to CUDA python with Numba}
+\subsection{Compile for the CPU}
+The Numba compiler is typically enabledd by applying a \textbf{function decorator} to a Python function. \\
+
+Decorators are function modifiers that transform the Python function they decorate. \\
+Example: 
+
+\begin{verbatim}
+
+from numba import jit
+...
+@jit
+def func(x,y):
+	...
+\end{verbatim}
+
+Numba saves the original Python implementation of the function using the following attribute:
+
+\begin{verbatim}
+.py_func()
+\end{verbatim}
+
+\subsection{Benchmarking}
+In a Jupyter notebook, use the \verb_\%timeit_ magic function to measure the speed of the code.
+
+to annotate code with data types use
+
+\begin{verbatim}
+.inspect_types()
+\end{verbatim}
+
+\subsection{Object and nopython Modes}
+As of right now, Numba annot compile some Python code, such as dictionaries, and some functions.
+
+If non-compilable code is encountered, Numba will fall back to \textbf{Object Mode} which does not do type-specialization.
+
+You can force nopython mode by passing the \verb_nopython_ argument to the decorator:
+
+\begin{verbatim}
+@jit(nopython=True)
+\end{verbatim}
+
+\textbf{Using nopython mode is the recommended and best practice way to use jit as it leads to best performance}
+
+\subsection{Introduction to Numba for the GPU with NumPy Universal Functions (ufuncs)}
+\subsubsection{Quick overview of ufuncs}
+ufuncs are functions that can take NumPy arrays of varying dimensions, or scalars, and operate on them element by element.
+
+Arrays of different, but compatible dimensions can also be combined via a technique called \textit{broadcasting}.
+
+\subsection{Making ufuncs for the GPU}
+Numba has the ability to create \textit{compiled} ufuncs. For instance, you can implement a scalar function to be performed on all the inputs, decorate it with \verb_@verctorize_, and Numba will figure out the broadcasting rules. 
+
+We can generate a ufunc that uses CUDA on the GPu with the addition of giving an \textbf{explicit type signiture} and setting the target \textit{attribute}
+
+\begin{verbatim}
+
+'return_value_type(argument1_value_type, argument2_value_type, ...)'
+
+\end{verbatim}
+
+For instance, the ufunc below expects two int64 values and also returns an int64 value:
+
+\begin{verbatim}
+# Type signature and target are required for the GPU
+@vectorize(['int64(int64, int64)'], target='cuda') 
+def add_ufunc(x, y):
+    return x + y
+\end{verbatim}
+
+\subsubsection{What just happened???}
+\begin{itemize}
+	\item Compuled a CUDA Kernel to execute the ufunc operation in parallel over the imput elements
+	\item Allocated GPU memory for the inputs and the outputs
+	\item Copied the input data to the GPU
+	\item Executed the CUDA kernel (GPU function) with the correct kernel dimensions given the input sizes
+	\item Copied the result back to the GPU to CPU
+	\item Returned the result as a Numpy array on the host
+\end{itemize}
+
+Sometimes, CPU calculations may be much faster than the GPU, \textit{but why}?
+
+\begin{itemize}
+	\item Inputs are too small, need a much larger array to keep the GPU busy.
+	\item Calculation too simple, lots of overhead and GPU will spend a lot of time waiting for data to move around.
+	\item Copying the data to and from the GPU, sometimes it makes sense to send data to the GPU and keep it there until all the processing is complete.
+	\item Data types are larger than necessary, scalar code using data types that are 32 and 64 bit run basically the same speed on the CPU, but 64 bit floating point data types may have a significant performance cost on the CPU, depending on the GPU type.
+
+\end{itemize}
+
+\subsection{CUDA Device Functions}
+
+In order to compile functions for the GPU that are \textbf{\underline{not}} element wise, vectorized functions, we use numba.cuda.jit.
+
+
+The argument \verb_device=True_ indicates that the decorated function can \textbf{\underline{only}} be called from a function running on the GPU, and not from the CPU host code.
+
+\subsection{Allowed Python on the GPU}
+Numba on the GPU has some limitations. Supported Python includes:
+
+\begin{itemize}
+	\item if/elif/else
+	\item while and for loops
+	\item basic math operators
+	\item selected functions from the math and cmath modules
+	\item tuples
+\end{itemize}
+
+
+\end{document}
+
