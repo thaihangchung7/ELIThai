@@ -21,7 +21,7 @@ Example:
 
 from numba import jit
 ...
-@jit
+@jit #the "Just-In-Time decorator"
 def func(x,y):
 	...
 \end{verbatim}
@@ -117,6 +117,55 @@ Numba on the GPU has some limitations. Supported Python includes:
 	\item selected functions from the math and cmath modules
 	\item tuples
 \end{itemize}
+
+\section{Custom CUDA Kernels in Python with Numba}
+\subsection{The Need for Custom Kernels}
+Consider any problem that requires the access to more than one element of a data structure in order to calculate its output. Any problem that cannot b expressed by a one to one input/output value mapping, such as reduction. These problems are still parallelizable, but cannot be expressed by a ufunc.
+
+\subsection{Introduction to CUDA Kernels}
+Developers write functions for the GPU called \textbf{kernels},which are executed/\textbf{launched}, on the GPU's many core in parallel \textbf{threads}. The special syntax used to launch these kernels are called \textbf{execution configurations}.
+
+\subsection{A First CUDA Kernel}
+CUDA kernels are compiled using the \verb_numba.cuda.jit_ decorator. Not to be confused with the \verb_numba.jit_ decorator which optimizes functions \textbf{for the CPU}.
+
+\subsubsection{Some important syntax to highlight}
+\begin{verbatim}
+from numba import cuda
+
+@cuda.jit 
+def add_kernel(x,y,out):
+
+	idx = cuda.grid(1)
+
+
+	out[idx] = x[idx] + y[idx]
+\end{verbatim}
+
+\begin{itemize}
+	\item \verb_@cuda.jit_: No explicit type signiture is required and does not return a value. 
+	\item \verb_cuda.grid(1)_: This calculation gives the unique thread within the entire grid. (1) is the one dimensional thread grid, returns a single value. \\
+
+This is equivalent to cuda.threadIdx.x + cuda.blockIdx * cuda.blockDim.x
+
+\end{itemize}
+
+\subsubsection{An Aside on Hiding Latency and Execution Configuration Choices}
+
+CUDA enabled Nvidia GPUs consist of several \textbf{Streaming Multiprocessors (SMs)} with attached DRAM. When a kernel is launched each block is assigned to a single SM. SM partition blocks into further subdivisions of 32 threads called \textbf{warps} and it is with these warps which are given parallel instructions to execute.\\
+
+To use the full potential of a GPU and write performant accelerated applications, it is essential to give the SMs the ability to hide latency by providing the with a sufficient number of warps which can be accomplished by exectuting kernels with sufficiently large grid and block dimensions.
+
+Some Hueristics:
+The size of a block should be a multiple of 32 threads (the size of a warp), with typical block sizes between 128 and 512 threads per block.
+The size of the grid should ensure the full GPU is utilized where possible. Launching a grid where the number of blocks is 2x-4x the number of SMs on the GPU is a good starting place. Something in the range of 20 - 100 blocks is usually a good starting point.
+The CUDA kernel launch overhead does increase with the number of blocks, so when the input size is very large we find it best not to launch a grid where the number of threads equals the number of input elements, which would result in a tremendous number of blocks. Instead we use a pattern to which we will now turn our attention for dealing with large inputs.
+
+\subsection{Working on Largest Datasets with Grid Stride Loops}
+
+\textbf{Memory coalescing} allows parallel threads to access memory in contiguous chunks, a scenario which the GPU can leverage to reduce the total number of memory operations.
+
+
+
 
 
 \end{document}
