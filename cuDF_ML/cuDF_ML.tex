@@ -1,0 +1,33 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{verbatim}
+
+\title{Accelerating End-to-End Data Science Workflows}
+\author{Notes inspired by NVIDIA DLI}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction to cuDF}
+\subsection{Reading and Writing Data}
+RAPIDS API provides a GPU accelerated dataframe with:
+
+\begin{verbatim}
+
+gdf = cudf.read_csv('/directory/path')
+
+gdf.shape
+
+gdf.dtypes
+
+\end{verbatim}
+
+For coloquial purposes, \verb_gdf_ will be used to represent a GPU dataframe and \verb_df_ for a CPU dataframe.
+
+\subsection{Writing to File}
+
+
+\end{document}
+
