@@ -12,15 +12,15 @@
 
 \section{Introduction to cuDF}
 \subsection{Reading and Writing Data}
-RAPIDS API provides a GPU accelerated dataframe with:
+The RAPIDS API provides a GPU accelerated dataframe with the \textbf{cudf} module, as shown below:
 
 \begin{verbatim}
 
 gdf = cudf.read_csv('/directory/path')
 
-gdf.shape
+gdf.shape #displays shape
 
-gdf.dtypes
+gdf.dtypes #display data types
 
 \end{verbatim}
 
@@ -28,6 +28,68 @@ For coloquial purposes, \verb_gdf_ will be used to represent a GPU dataframe and
 
 \subsection{Writing to File}
 
+The syntax for writing to csv is similar to the Pandas was of doing things:
+
+\begin{verbatim}
+
+datatocsv.to_csv('csvfilename.csv')
+
+
+\end{verbatim}
+\section{Basic Operations with cuDF}
+\subsubsection{Converting data types}
+Let's say I want convert an int64 to float32, I would use the \verb_.astype('float32')_ attribute to convert this dtype
+For example:
+
+
+\begin{verbatim}
+
+gdf['age'] = gdf['age'].astype('float32')
+
+\end{verbatim}
+
+
+
+\subsubsection{Column-wise aggregations}
+
+Column-wise aggregations take advantage of the GPU's architecture and RAPIDS' memory format. \\
+
+For comparison, cuDF's \verb_.mean()_ attribute completes in 4ms as opposed to Pandas' 236ms!
+
+\subsubsection{String operations}
+Although strings are not a datatype traditionally associated with GPUs, cuDF supports powerful accelerated string operations.
+
+For instance, using the titlecase function \verb_.str.title()_ completes in 24ms with cuDF versus Pandas' ~24s! \\
+
+Some example syntax:
+
+\begin{verbatim}
+gdf['name'] = gdf['name'].str.title()
+\end{verbatim}
+
+\subsubsection{Data subsetting with loc and iloc}
+Recall that \verb_loc_ is a label based locator and \verb_iloc_is an integer-based locator.
+
+\textbf{Range Selection}: \verb_gdf.loc[100:105]_ will include every value it is passed \textit{100-105}. \verb_gdf.iloc[100:105]_ will give half-open range (omitting the final value), \textit{100-104}
+
+\textbf{loc with boolean selection}: 
+We can return all words that start with 'E' using the \verb_str.startswith('E')_ attribute.
+
+\subsection{Combining with Numpy Methods}
+As an example we can use the Numpy "logical and" attribute for elementwise boolean selection.
+ 
+
+\begin{verbatim}
+np.logical_and
+\end{verbatim}
+
+
+Example syntax:
+
+\begin{verbatim}
+ed_names = gdf.loc[np.logical_and(gdf['name'].str.startswith
+('E'), gdf['name'].str.endswith('d'))]
+\end{verbatim}
 
 \end{document}
 
